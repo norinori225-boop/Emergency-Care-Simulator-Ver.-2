@@ -952,7 +952,9 @@ function showDebrief(pct,got,max,crit){
     <button class="close" onclick="backToStart()">別の症例に挑戦</button>
   `;
   document.getElementById("debriefInner").innerHTML=html;
-  document.getElementById("debrief").classList.remove("hidden");
+  const debriefEl=document.getElementById("debrief");
+  debriefEl.classList.remove("hidden");
+  debriefEl.scrollTop=0;
 }
 
 function toggleDebriefAI(){
