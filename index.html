@@ -70,6 +70,8 @@ button{cursor:pointer;font-family:inherit}
 .act:hover{border-color:var(--accent);background:#1d2836}
 .act.done{opacity:.55;border-color:var(--accent)}
 .act.done::after{content:" ✓";color:var(--accent)}
+.act.wrong-done{opacity:.85;border-color:var(--crit);background:#2a1717}
+.act.wrong-done::after{content:" ✗";color:var(--crit)}
 .act .s{display:block;font-size:11px;color:var(--muted)}
 .finding{background:#0e1620;border-left:3px solid var(--spo2);padding:10px 12px;border-radius:6px;margin-top:10px;font-size:13px;line-height:1.65;animation:fade .3s}
 .finding b{color:var(--spo2)}
@@ -114,6 +116,37 @@ button{cursor:pointer;font-family:inherit}
 .bar{height:10px;background:#0e141d;border-radius:6px;overflow:hidden;margin-top:6px}
 .bar>i{display:block;height:100%;background:var(--accent)}
 @media(max-width:1200px){#sim{grid-template-columns:320px 1fr;grid-template-rows:54px 1fr auto}#log{grid-column:1/3;border-left:none;border-top:1px solid var(--line);max-height:200px}}
+/* ===== Structured Debriefing (Phase 2) ===== */
+.debrief-toggle{display:block;width:100%;padding:14px;border:2px solid var(--accent);border-radius:10px;background:transparent;color:var(--accent);font-weight:700;font-size:15px;margin:12px 0 0;cursor:pointer;transition:.15s}
+.debrief-toggle:hover{background:rgba(61,220,132,.1)}
+.debrief-phase2{margin-top:22px;border-top:2px solid var(--line);padding-top:22px}
+.debrief-phase2>h2{font-size:18px;margin-bottom:4px;color:var(--accent)}
+.debrief-phase2>.phase-hint{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.7}
+.tl-replay{background:#0a0e15;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:0;max-height:200px;overflow-y:auto}
+.tl-replay h4{font-size:12px;color:var(--muted);margin-bottom:8px;letter-spacing:1px}
+.tl-item{font-size:12px;line-height:1.5;padding:5px 8px;border-radius:6px;margin-bottom:4px;background:#0e141d;border:1px solid var(--line);display:flex;gap:8px;align-items:baseline}
+.tl-item .t{color:var(--accent);font-variant-numeric:tabular-nums;font-weight:700;flex:none;width:46px;font-size:11px}
+.tl-item.event{border-left:3px solid var(--warn);background:#1a130d}
+.tl-item.tx{border-left:3px solid var(--hr)}
+.plus-delta{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pd-card{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px}
+.pd-card .pd-head{font-size:14px;font-weight:700;margin-bottom:8px}
+.pd-card.plus .pd-head{color:var(--accent)}
+.pd-card.delta .pd-head{color:var(--warn)}
+.pd-card textarea,.ai-q textarea{width:100%;background:#0b0f14;border:1px solid var(--line);border-radius:7px;color:var(--txt);padding:9px;font-size:13px;font-family:inherit;resize:vertical;line-height:1.6}
+.pd-card textarea{min-height:100px}
+.pd-card textarea:focus,.ai-q textarea:focus{outline:none;border-color:var(--accent)}
+.ai-q{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--spo2);border-radius:10px;padding:14px;margin-bottom:10px}
+.ai-q:last-child{margin-bottom:0}
+.ai-q .q-text{font-size:14px;font-weight:600;margin-bottom:8px;color:var(--spo2)}
+.ai-q textarea{min-height:72px}
+.ai-q textarea:focus{border-color:var(--spo2)}
+.ai-q-structured{border-left-color:var(--warn)}
+.ai-obs-label{font-size:11px;color:var(--warn);font-weight:700;letter-spacing:1px;margin-bottom:5px}
+.ai-obs-text{font-size:13px;color:var(--txt);line-height:1.75;background:rgba(255,122,89,.07);border:1px solid rgba(255,122,89,.22);border-radius:6px;padding:10px 12px;margin-bottom:10px}
+.ai-inq-label{font-size:11px;color:var(--spo2);font-weight:700;letter-spacing:1px;margin-bottom:5px}
+.ai-q-plain .q-text{color:var(--muted)}
+@media(max-width:640px){.plus-delta{grid-template-columns:1fr}}
 /* ===== Random case gacha panel ===== */
 .gacha{background:linear-gradient(180deg,#13202c,#101824);border:1px solid var(--accent);border-radius:16px;padding:18px 20px;margin-bottom:26px}
 .gacha-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:14px}
@@ -233,7 +266,7 @@ const SCENARIOS = [
     "酸素投与":{spo2:+8,note:"SpO₂上昇",key:true},
     "安楽な体位(半坐位)":{rr:-3,note:"呼吸が少し楽に",key:true},
     "12誘導心電図":{note:"II・III・aVFでST上昇 → 下壁梗塞を示唆",key:true},
-    "静脈路確保":{note:"左前腕に確保",key:true},
+    "静脈路確保":{note:"左前腕に確保"},
     "保温":{note:"冷汗・末梢冷感に対し保温"},
     "心電図モニター装着":{note:"洞性徐脈、時に心室期外収縮",key:true},
   },
@@ -268,6 +301,12 @@ const SCENARIOS = [
   },
   dxOptions:["急性心筋梗塞(ACS)","大動脈解離","気胸","逆流性食道炎","肺塞栓"],
   destOptions:["三次(循環器対応・PCI可能)","二次(一般救急)","近隣のかかりつけ内科"],
+  aiQ:[
+    "現着時の第一印象で最も気になった所見は何でしたか？その所見からどんな疾患を頭に浮かべましたか？",
+    "12誘導心電図を装着しようと判断した根拠と、結果をどう解釈しましたか？",
+    "今回の搬送先（三次・PCI可能施設）を選んだ根拠を一言で説明するとしたら何と言いますか？",
+    "次回同じ症例に当たったとき、処置・判断で最初に変えたいことは何ですか？",
+  ],
  },
 
  {
@@ -321,6 +360,12 @@ const SCENARIOS = [
   },
   dxOptions:["脳梗塞(脳卒中)","低血糖","てんかん後麻痺","末梢性顔面神経麻痺","片頭痛"],
   destOptions:["三次(t-PA/血栓回収可能な脳卒中センター)","二次(一般救急)","かかりつけ整形外科"],
+  aiQ:[
+    "「脳卒中かもしれない」と最初に感じたのはどの所見でしたか？FASTのどの項目が最初に引っかかりましたか？",
+    "発症時刻（最終健常確認）の確認が搬送先選定にどう影響しましたか？意識して確認できましたか？",
+    "t-PA・血栓回収の適応時間を念頭に置いた搬送先の絞り込みを、どのタイミングで行いましたか？",
+    "次回変えること・もっと早くできたことを1つ挙げてください。",
+  ],
  },
 
  {
@@ -336,7 +381,8 @@ const SCENARIOS = [
     rr:{drift:+0.3,floor:14,ceil:40},
   },
   tx:{
-    "アドレナリン筋注の要請/連携":{hr:-15,sbp:+25,spo2:+5,rr:-6,note:"医師指示下/エピペン:症状著明改善",key:true,heal:true},
+    "アドレナリン筋注の要請/連携（医師指示・本人処方品）":{hr:-15,sbp:+25,spo2:+5,rr:-6,note:"医師指示下で実施。症状著明改善",key:true,heal:true},
+    "同僚のエピペンを使用（他者処方）":{note:"救急救命士が使用できるエピペンは本人処方品のみ。他者処方品の使用は法令上・倫理上不適切",wrong:true},
     "高濃度酸素投与":{spo2:+10,note:"SpO₂上昇",key:true},
     "仰臥位+下肢挙上(ショック体位)":{sbp:+8,note:"血圧やや改善",key:true},
     "静脈路確保・輸液":{sbp:+10,note:"細胞外液急速投与",key:true},
@@ -360,7 +406,7 @@ const SCENARIOS = [
   },
   family:{
     "同僚へ：何の蜂？":"スズメバチだと思います。さっき飛んでました。",
-    "同僚へ：エピペンは持ってる？":"本人は持っていないと思います。",
+    "同僚へ：エピペンは持ってる？":"私（同僚）のエピペンがあります！使えますか？（同僚本人の処方品）",
     "同僚へ：刺されたのは何回目？":"前にも刺されて腫れたと言ってました。",
   },
   exam:{
@@ -373,6 +419,12 @@ const SCENARIOS = [
   },
   dxOptions:["アナフィラキシーショック","気管支喘息発作","過換気症候群","心原性ショック","熱中症"],
   destOptions:["三次(救命救急センター)","二次(一般救急)","皮膚科クリニック"],
+  aiQ:[
+    "「アナフィラキシー」の可能性を最初に考えたのはどの所見・情報でしたか？皮膚症状・気道・循環のうちどれが一番の引き金でしたか？",
+    "アドレナリン筋注を「今すぐ要請・使うべき」と判断した、または迷ったタイミングを振り返ってください。",
+    "気道狭窄（喉頭浮腫）の進行をどう観察しましたか？最も気をつけた所見を教えてください。",
+    "次回変えること・もっと早くできたことを1つ挙げてください。",
+  ],
  },
 
  {
@@ -426,6 +478,12 @@ const SCENARIOS = [
   },
   dxOptions:["腹腔内出血による出血性ショック","単純腹部打撲","緊張性気胸","骨盤骨折","脊髄損傷"],
   destOptions:["三次(外傷センター)","二次(一般救急)","整形外科クリニック"],
+  aiQ:[
+    "現着時のショック徴候（皮膚・脈・血圧）から「出血性ショック」を疑った根拠を振り返ってください。ショック指数(HR/SBP)を意識しましたか？",
+    "「ロード＆ゴー」を判断したタイミングと根拠を振り返ってください。現場滞在時間を短縮するための判断は適切でしたか？",
+    "頸椎保護・脊柱固定と搬送時の体位について、どう優先順位をつけましたか？",
+    "次回変えること・もっと早くできたことを1つ挙げてください。",
+  ],
  },
 
  {
@@ -479,6 +537,12 @@ const SCENARIOS = [
   },
   dxOptions:["低血糖","脳卒中","脱水・熱中症","感染症(敗血症)","薬物中毒"],
   destOptions:["二次(かかりつけ・内科対応)","三次(救命救急センター)","経過観察で帰宅"],
+  aiQ:[
+    "「意識障害の原因が低血糖かもしれない」と考えたのは、どの情報が引き金でしたか（内服薬・食事状況・皮膚所見）？",
+    "血糖測定のタイミングを振り返ってください。初期評価の流れの中でいつ組み込みましたか？",
+    "血糖改善後も「帰宅させない・経過観察が必要」な理由を、インスリン・経口薬の薬理から説明できますか？",
+    "次回変えること・もっと早くできたことを1つ挙げてください。",
+  ],
  },
 ];
 
@@ -493,7 +557,7 @@ function startScenario(sc){
     tx:{}, asked:{}, examined:{}, familyAsked:{}, flags:{},
     log:[], firedEvents:{}, started:Date.now(),
     initialAssessDone:false, situationDone:false,
-    selectedDx:null, selectedSev:null, selectedDest:null,
+    selectedDxArr:[], selectedSev:null, selectedDest:null,
     ecgPhase:0, plethPhase:0, ecgData:[], plethData:[],
   };
   document.getElementById("start").classList.add("hidden");
@@ -551,6 +615,10 @@ function applyTx(name){
   }
   if(S.tx[name]) return;
   S.tx[name]=S.t;
+  if(def.wrong){
+    addLog("⚠ 不適切処置："+name+(def.note?" ―― "+def.note:""), S.t, "event");
+    renderVitals(); renderPanel(); return;
+  }
   // one-time vital effects
   ["hr","sbp","spo2","rr","gcs"].forEach(k=>{
     if(def[k]!=null){
@@ -700,18 +768,23 @@ function renderPanel(){
   }
   else if(curTab=="tx"){
     p.innerHTML=`<h2>処置</h2><div class="hint">必要な処置を選択します。処置はバイタルに影響します。やりすぎ・不要な処置も評価対象です。</div><div class="actions" id="acts"></div><div id="out"></div>`;
-    p.querySelector("#acts").innerHTML=Object.keys(sc.tx).map(t=>
-      `<button class="act ${S.tx[t]?'done':''}" onclick="applyTx('${esc(t)}')">${t}</button>`).join("");
+    p.querySelector("#acts").innerHTML=Object.keys(sc.tx).map(t=>{
+      const cls=S.tx[t]?(sc.tx[t].wrong?'wrong-done':'done'):'';
+      return `<button class="act ${cls}" onclick="applyTx('${esc(t)}')">${t}</button>`;
+    }).join("");
     p.querySelector("#out").innerHTML=Object.keys(sc.tx).filter(t=>S.tx[t]).map(t=>
-      `<div class="finding"><b>${t}</b>：${sc.tx[t].note||'実施'}</div>`).join("");
+      sc.tx[t].wrong
+        ?`<div class="finding" style="border-left-color:var(--crit);background:#2a1313"><b>⚠ 不適切処置：${t}</b><br><span style="font-size:12px;color:var(--crit)">${sc.tx[t].note||''}</span></div>`
+        :`<div class="finding"><b>${t}</b>：${sc.tx[t].note||'実施'}</div>`
+    ).join("");
   }
   else if(curTab=="judge"){
     p.innerHTML=`<h2>判断・搬送先選定</h2><div class="hint">これまでの観察から疾患を推定し、重症度と搬送先を選びます。これらが最終評価に反映されます。</div>
-      <div style="margin:10px 0 4px;font-weight:700;font-size:13px">① 疾患の推定</div><div class="actions" id="dx"></div>
+      <div style="margin:10px 0 4px;font-weight:700;font-size:13px">① 疾患の推定 <span style="font-size:11px;font-weight:400;color:var(--muted)">（複数選択可・正解は1つ）</span></div><div class="actions" id="dx"></div>
       <div style="margin:14px 0 4px;font-weight:700;font-size:13px">② 重症度の判断</div><div class="actions" id="sev"></div>
       <div style="margin:14px 0 4px;font-weight:700;font-size:13px">③ 搬送先の選定</div><div class="actions" id="dest"></div>`;
     p.querySelector("#dx").innerHTML=sc.dxOptions.map(o=>
-      `<button class="act ${S.selectedDx==o?'done':''}" onclick="pick('dx','${esc(o)}')">${o}</button>`).join("");
+      `<button class="act ${S.selectedDxArr.includes(o)?'done':''}" onclick="pick('dx','${esc(o)}')">${o}</button>`).join("");
     p.querySelector("#sev").innerHTML=["軽症","中等症","重症","重症(緊急)"].map(o=>
       `<button class="act ${S.selectedSev==o?'done':''}" onclick="pick('sev','${esc(o)}')">${o}</button>`).join("");
     p.querySelector("#dest").innerHTML=sc.destOptions.map(o=>
@@ -762,7 +835,8 @@ function showOut(t){const o=document.querySelector("#panel #out"); if(o) o.inner
 function askHistory(q){ S.asked[q]=S.t; addLog("問診："+q,S.t); renderPanel(); }
 function askFamily(q){ S.familyAsked[q]=S.t; addLog("関係者聴取："+q,S.t); renderPanel(); }
 function pick(type,val){
-  if(type=="dx")S.selectedDx=val; if(type=="sev")S.selectedSev=val; if(type=="dest")S.selectedDest=val;
+  if(type=="dx"){const i=S.selectedDxArr.indexOf(val);if(i>=0)S.selectedDxArr.splice(i,1);else S.selectedDxArr.push(val);}
+  if(type=="sev")S.selectedSev=val; if(type=="dest")S.selectedDest=val;
   renderPanel();
 }
 
@@ -820,9 +894,14 @@ function finish(){
   }
 
   // 7 judgement
-  add("疾患推定が適切", S.selectedDx===sc.truth.dx, 8, "正解: "+sc.truth.dx+(S.selectedDx?(" / 選択: "+S.selectedDx):" / 未選択"));
+  add("疾患推定が適切", S.selectedDxArr.includes(sc.truth.dx), 8, "正解: "+sc.truth.dx+(S.selectedDxArr.length?(" / 選択: "+S.selectedDxArr.join("・")):" / 未選択"));
   add("重症度判断が適切", sevMatch(S.selectedSev,sc.truth.sev), 6, "想定: "+sc.truth.sev+(S.selectedSev?(" / 選択: "+S.selectedSev):""));
   add("搬送先選定が適切", S.selectedDest===sc.truth.dest, 8, "適切: "+sc.truth.dest+(S.selectedDest?(" / 選択: "+S.selectedDest):" / 未選択"));
+
+  // wrong treatments
+  Object.entries(sc.tx||{}).filter(([k,v])=>v.wrong&&S.tx[k]).forEach(([k,v])=>{
+    add("【不適切処置】"+k, false, 0, v.note||"不適切な処置が実施されました");
+  });
 
   // patient outcome based on final vitals
   const v=S.vit; const stable = v.sbp>=90 && v.spo2>=92 && v.gcs>=13 && v.hr>=50 && v.hr<=130;
@@ -857,7 +936,7 @@ function showDebrief(pct,got,max,crit){
     <div class="scoresec">
       <h3>正解と要点</h3>
       <div class="crit"><span class="mk pt2">DX</span><div><b>正しい疾患：</b>${sc.truth.dx}　<b>重症度：</b>${sc.truth.sev}<br><b>適切な搬送先：</b>${sc.truth.dest}</div></div>
-      <div class="crit"><span class="mk">📝</span><div>あなたの判断 — 疾患:${S.selectedDx||"未選択"} / 重症度:${S.selectedSev||"未選択"} / 搬送先:${S.selectedDest||"未選択"}</div></div>
+      <div class="crit"><span class="mk">📝</span><div>あなたの判断 — 疾患:${S.selectedDxArr.length?S.selectedDxArr.join("・"):"未選択"} / 重症度:${S.selectedSev||"未選択"} / 搬送先:${S.selectedDest||"未選択"}</div></div>
     </div>
     <div class="scoresec">
       <h3>観察・処置の評価 <span style="color:var(--muted);font-weight:400">${crit.filter(c=>c.pass).length}/${crit.length} 項目クリア</span></h3>
@@ -868,11 +947,215 @@ function showDebrief(pct,got,max,crit){
       <h3>講評</h3>
       <div style="font-size:13px;line-height:1.8;color:var(--txt)">${comment(pct,sc,crit)}</div>
     </div>
+    <button class="debrief-toggle" id="toggleDebriefBtn" onclick="toggleDebriefAI()">📋 振り返り（構造化デブリーフィング）を開く</button>
+    <div id="debriefAISection" class="hidden"></div>
     <button class="close" onclick="backToStart()">別の症例に挑戦</button>
   `;
   document.getElementById("debriefInner").innerHTML=html;
   document.getElementById("debrief").classList.remove("hidden");
 }
+
+function toggleDebriefAI(){
+  const sec=document.getElementById("debriefAISection");
+  const btn=document.getElementById("toggleDebriefBtn");
+  if(!sec||!btn) return;
+  if(sec.classList.contains("hidden")){
+    if(!sec.innerHTML) sec.innerHTML=buildDebriefAI();
+    sec.classList.remove("hidden");
+    btn.textContent="📋 振り返りを閉じる";
+    sec.scrollIntoView({behavior:"smooth",block:"start"});
+  } else {
+    sec.classList.add("hidden");
+    btn.textContent="📋 振り返り（構造化デブリーフィング）を開く";
+  }
+}
+
+function buildDebriefAI(){
+  const logItems=[...S.log].reverse();
+  const tlHtml=logItems.map(l=>`<div class="tl-item ${l.cls||''}"><span class="t">${fmt(l.t)}</span><span>${l.msg}</span></div>`).join("");
+  const questions=genDebriefQuestions(S);
+  const qHtml=questions.map(q=>{
+    if(q.a){
+      return `<div class="ai-q ai-q-structured">
+        <div class="ai-obs-label">👁 観察（Advocacy）</div>
+        <div class="ai-obs-text">${q.a}</div>
+        <div class="ai-inq-label">💬 Inquiry</div>
+        <div class="q-text">${q.q}</div>
+        <textarea placeholder="あなたの考え・根拠を記入…" rows="3"></textarea>
+      </div>`;
+    }
+    return `<div class="ai-q ai-q-plain">
+      <div class="q-text">${q.text||q}</div>
+      <textarea placeholder="ここに記入…" rows="3"></textarea>
+    </div>`;
+  }).join("");
+  return `
+    <div class="debrief-phase2">
+      <h2>📋 構造化デブリーフィング</h2>
+      <p class="phase-hint">成人学習の核「省察的実践」― 事実を振り返り、判断の根拠を言語化し、次への行動変容につなげましょう。</p>
+      <div class="scoresec">
+        <h3>① 事実確認 ― タイムライン</h3>
+        <div class="tl-replay">
+          <h4>活動ログ（時系列）</h4>
+          ${tlHtml}
+        </div>
+      </div>
+      <div class="scoresec">
+        <h3>② 深掘り質問（Advocacy-Inquiry）</h3>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.7">「観察」は訓練中に実際に起きた事実です。その場面でどう考えていたかを振り返ってください。</p>
+        ${qHtml}
+      </div>
+    </div>`;
+}
+function genDebriefQuestions(S){
+  const gen={ami:debriefGen_ami,cva:debriefGen_cva,ana:debriefGen_ana,trauma:debriefGen_trauma,hypo:debriefGen_hypo};
+  if(gen[S.sc.id]) return gen[S.sc.id](S);
+  return (S.sc.aiQ||["最初に気になった所見は何でしたか？","判断の根拠を振り返ってください。","次回変えたいことを1つ挙げてください。"]).map(q=>({text:q}));
+}
+function _initDoneT(S){
+  if(!S.initItems) return null;
+  const v=Object.values(S.initItems);
+  return v.length?Math.max(...v):null;
+}
+
+function debriefGen_ami(S){
+  const qs=[];
+  const o2t=S.tx["酸素投与"];
+  const ecgt=S.tx["12誘導心電図"];
+  const initT=_initDoneT(S);
+  if(!o2t){
+    qs.push({a:`訓練中、酸素投与は実施されませんでした。初期SpO₂は${S.vit0.spo2}%で、処置なしでは低下が続く経過でした。`,
+      q:"酸素投与を検討しなかった（またはできなかった）理由を振り返ってください。その時点で何を優先していましたか？"});
+  } else if(o2t>120){
+    qs.push({a:`酸素投与は${fmt(o2t)}に実施されました。初期SpO₂${S.vit0.spo2}%から低下傾向があり、より早い判断の余地があったと感じました。`,
+      q:"酸素投与が後回しになった理由を振り返ってください。その時点で何を優先して観察・処置していましたか？"});
+  } else {
+    qs.push({a:`酸素投与は${fmt(o2t)}に早期実施されました。SpO₂低下に対して適切なタイミングでした。`,
+      q:"酸素投与の判断根拠を言語化してください。どの所見・情報が決め手でしたか？"});
+  }
+  if(!ecgt){
+    qs.push({a:`12誘導心電図は実施されませんでした。ST変化の確認はPCI可能施設への搬送根拠に直結します。`,
+      q:"12誘導を実施しなかった（またはできなかった）理由を振り返ってください。搬送先はどんな根拠で判断しましたか？"});
+  } else if(initT&&ecgt<initT){
+    qs.push({a:`12誘導心電図は${fmt(ecgt)}に実施されましたが、初期評価（ABCD）の完了（${fmt(initT)}）より前でした。`,
+      q:"初期評価より先に12誘導に進んだのはどんな判断からでしたか？このケースでの優先順位の考え方を振り返ってください。"});
+  } else {
+    qs.push({a:`12誘導心電図は${fmt(ecgt)}に実施されました。`,
+      q:"結果から何を読み取り、搬送先の判断にどうつなげましたか？ST変化の解釈を振り返ってください。"});
+  }
+  qs.push({text:"次回この症例に当たったとき、処置の順番や搬送先判断で変えたいことを1つ挙げてください。"});
+  return qs;
+}
+
+function debriefGen_cva(S){
+  const qs=[];
+  const onsetT=S.tx["発症時刻の確認"];
+  const fasT=S.tx["麻痺の評価(CPSS/ELVO)"];
+  if(!onsetT){
+    qs.push({a:`訓練中、「発症時刻の確認」は実施されませんでした。t-PA・血栓回収の適応時間（最終健常確認から4.5時間以内）の判断が搬送先選定を左右します。`,
+      q:"発症時刻を確認しようとしなかった（またはできなかった）理由を振り返ってください。この情報がなければ搬送先の判断はどうなりますか？"});
+  } else if(onsetT>120){
+    qs.push({a:`「発症時刻の確認」は${fmt(onsetT)}に実施されました。t-PA適応の時間的制約を考えると、より早い段階での確認が重要だと感じました。`,
+      q:"発症時刻の確認が後回しになった理由を振り返ってください。どの段階でこの情報が必要だと気づきましたか？"});
+  } else {
+    qs.push({a:`「発症時刻の確認」は${fmt(onsetT)}に実施されました。早期の情報収集ができています。`,
+      q:"この情報が搬送先の絞り込みにどうつながりましたか？t-PA適応の時間的判断を振り返ってください。"});
+  }
+  if(!fasT){
+    qs.push({a:`「麻痺の評価（CPSS/ELVO）」は実施されませんでした。顔面・上肢・言語の3項目評価は脳卒中スクリーニングの基本です。`,
+      q:"FAST・CPSS評価を実施しなかった（またはできなかった）理由を振り返ってください。脳卒中を疑う根拠はどこから得ていましたか？"});
+  } else {
+    qs.push({a:`麻痺の評価（CPSS/ELVO）は${fmt(fasT)}に実施されました。`,
+      q:"3項目（顔面・上肢・言語）のうち、最初に異常に気づいた所見はどれでしたか？ELVO（大血管閉塞）の疑いにどうつなげましたか？"});
+  }
+  qs.push({text:"次回この症例に当たったとき、情報収集・搬送先選定の判断で変えたいことを1つ挙げてください。"});
+  return qs;
+}
+
+function debriefGen_ana(S){
+  const qs=[];
+  const wrongEpi=S.tx["同僚のエピペンを使用（他者処方）"];
+  if(wrongEpi){
+    qs.push({a:`${fmt(wrongEpi)}に「同僚のエピペン」が使用されました。救急救命士が使用できるエピペンは、患者本人が所持する処方品のみです。今回の症例では患者本人はエピペンを持参していませんでした。`,
+      q:"なぜ同僚のエピペンを使用しようとしましたか？本人処方以外のエピペン使用が不適切な理由（法的根拠・倫理的観点）を振り返ってください。"});
+  }
+  const epit=S.tx["アドレナリン筋注の要請/連携（医師指示・本人処方品）"]||S.tx["アドレナリン筋注の要請/連携"];
+  const airwayT=S.tx["気道の観察(喉頭浮腫)"];
+  if(!epit){
+    qs.push({a:`訓練中、アドレナリン筋注の要請・連携は実施されませんでした。初期所見として皮膚症状・気道症状（喘鳴）・循環障害（BP${S.vit0.sbp}/${S.vit0.dbp}）が揃っていました。`,
+      q:"アドレナリン筋注の適応だと判断しなかった（またはできなかった）理由を振り返ってください。3主徴の揃い方をどう評価していましたか？"});
+  } else if(epit>90){
+    qs.push({a:`アドレナリン筋注の要請は${fmt(epit)}に実施されました。「皮膚症状＋気道または循環障害」が揃った時点が適応の目安です。私は早期判断の余地があったと感じました。`,
+      q:"判断が遅れた（または慎重になった）理由を振り返ってください。その時点で何を確認しようとしていましたか？"});
+  } else {
+    qs.push({a:`アドレナリン筋注の要請は${fmt(epit)}に実施されました。早期の的確な判断です。`,
+      q:"「今すぐ」と判断した根拠を言語化してください。どの所見の組み合わせが決め手でしたか？"});
+  }
+  if(!airwayT){
+    qs.push({a:`「気道の観察（喉頭浮腫）」は実施されませんでした。嗄声・吸気性喘鳴は数分以内に完全閉塞に至りうる緊急サインです。`,
+      q:"気道狭窄の進行を継続評価しなかった（またはできなかった）理由を振り返ってください。気道閉塞のリスクをどう認識していましたか？"});
+  } else {
+    qs.push({a:`「気道の観察（喉頭浮腫）」は${fmt(airwayT)}に実施されました。`,
+      q:"嗄声・吸気性喘鳴の変化を時間を追って確認できましたか？最も気になった場面と、そのとき次にとろうとした行動を教えてください。"});
+  }
+  qs.push({text:"次回この症例に当たったとき、最初に変えたい処置・判断を1つ挙げてください。"});
+  return qs;
+}
+
+function debriefGen_trauma(S){
+  const qs=[];
+  const lngt=S.tx["ロード&ゴー判断"];
+  const spineT=S.tx["頸椎保護・全脊柱固定"];
+  const initT=_initDoneT(S);
+  if(!lngt){
+    qs.push({a:`「ロード＆ゴー」の判断は実施されませんでした。腹腔内出血による出血性ショックが進行する経過であり、現場滞在時間の短縮が予後を左右します。`,
+      q:"早期搬送の判断をしなかった（またはできなかった）理由を振り返ってください。現場での処置と搬送開始のバランスをどう考えていましたか？"});
+  } else if(lngt>180){
+    qs.push({a:`「ロード＆ゴー」の判断は${fmt(lngt)}に実施されました。出血性ショックでは現場滞在の短縮が優先であり、私は早期判断の余地があったと感じました。`,
+      q:"判断が遅れた理由を振り返ってください。どの処置が完了してから搬送を決断しようとしていましたか？"});
+  } else {
+    qs.push({a:`「ロード＆ゴー」の判断は${fmt(lngt)}に実施されました。出血性ショックに対して迅速な判断です。`,
+      q:"「今すぐ搬送」と判断したのはどの所見の組み合わせからでしたか？その根拠を言語化してください。"});
+  }
+  if(!spineT){
+    qs.push({a:`「頸椎保護・全脊柱固定」は実施されませんでした。バイク事故の受傷機転では脊髄損傷の合併を考慮した保護が必要です。`,
+      q:"頸椎保護を実施しなかった（またはできなかった）理由を振り返ってください。この症例での脊損リスクをどう評価していましたか？"});
+  } else if(initT&&spineT>initT+60){
+    qs.push({a:`「頸椎保護・全脊柱固定」は${fmt(spineT)}に実施されましたが、初期評価完了（${fmt(initT)}）から${fmt(spineT-initT)}が経過していました。`,
+      q:"頸椎保護の実施が後回しになった理由を振り返ってください。ロード＆ゴー・出血コントロールとの優先順位をどう判断していましたか？"});
+  } else {
+    qs.push({a:`「頸椎保護・全脊柱固定」は${fmt(spineT)}に実施されました。`,
+      q:"頸椎保護と搬送判断・出血コントロールを並行して行う際、どう優先順位をつけましたか？"});
+  }
+  qs.push({text:"次回この症例に当たったとき、現場での処置の優先順位で変えたいことを1つ挙げてください。"});
+  return qs;
+}
+
+function debriefGen_hypo(S){
+  const qs=[];
+  const glucT=S.tx["血糖測定"];
+  const glcAdmT=S.tx["ブドウ糖投与の連携(経口/静注)"];
+  if(!glucT){
+    qs.push({a:`訓練中、血糖測定は実施されませんでした。「糖尿病の内服薬・インスリン使用＋朝食欠食＋冷汗・振戦」という低血糖を示唆する手がかりが複数ありました。`,
+      q:"血糖測定を実施しなかった（またはできなかった）理由を振り返ってください。意識障害の原因として低血糖はどの段階で念頭にありましたか？"});
+  } else if(glucT>150){
+    qs.push({a:`血糖測定は${fmt(glucT)}に実施されました。内服薬・食事状況・冷汗などの手がかりから、より早い段階で仮説を立て測定できたと感じました。`,
+      q:"血糖測定の判断が後回しになった理由を振り返ってください。どの段階で「低血糖を疑う」という仮説に気づきましたか？"});
+  } else {
+    qs.push({a:`血糖測定は${fmt(glucT)}に実施されました。早期の原因検索ができています。`,
+      q:"「低血糖を疑う」という仮説を立てたのはどの情報を得たタイミングでしたか？仮説から測定実施までの判断の流れを振り返ってください。"});
+  }
+  if(glucT&&!glcAdmT){
+    qs.push({a:`血糖測定（${fmt(glucT)}）は実施されましたが、ブドウ糖投与の連携は実施されませんでした。血糖32mg/dLで意識障害がある場合、迅速な補正が必要です。`,
+      q:"血糖値の確認後、ブドウ糖投与を実施しなかった理由を振り返ってください。次のステップとして何を考えていましたか？"});
+  } else if(glcAdmT){
+    qs.push({a:`ブドウ糖投与の連携は${fmt(glcAdmT)}に実施されました。`,
+      q:"血糖が改善した後も搬送・経過観察が必要な理由を、インスリンや経口血糖降下薬の特性から説明できますか？再低血糖のリスクをどう評価していましたか？"});
+  }
+  qs.push({text:"次回この症例に当たったとき、意識障害の鑑別アプローチで変えたいことを1つ挙げてください。"});
+  return qs;
+}
+
 function comment(pct,sc,crit){
   const fails=crit.filter(c=>!c.pass).map(c=>c.label);
   let msg="";
@@ -916,7 +1199,7 @@ document.getElementById("pauseBtn").onclick=()=>{paused=!paused;updatePauseBtn()
 document.getElementById("quitBtn").onclick=()=>{if(confirm("訓練を中止して症例選択に戻りますか？"))backToStart();};
 document.getElementById("finishBtn").onclick=()=>{
   if(!S.initialAssessDone){alert("まず初期評価(ABCD)を完了してください。");return;}
-  if(!S.selectedDx||!S.selectedDest){if(!confirm("疾患推定または搬送先が未選択です。このまま評価しますか？"))return;}
+  if(!S.selectedDxArr.length||!S.selectedDest){if(!confirm("疾患推定または搬送先が未選択です。このまま評価しますか？"))return;}
   finish();
 };
 /* =========================================================
@@ -943,13 +1226,14 @@ const TEMPLATES=[
  demo:p=>`${p.age}歳 ${p.sex} / 前傾姿勢で苦悶様顔貌。冷汗あり。`,
  vit0:()=>{const sbp=R(84,104),g=15;return{hr:R(44,60),sbp,dbp:dbpOf(sbp),spo2:R(92,96),rr:R(20,26),bt:R1(36.2,36.7),gcs:g,jcs:jcsOf(g),pupil:"3.0mm 両側 対光反射あり",skin:"冷汗・蒼白"};},
  model:{hr:{drift:-0.6,floor:36,ceil:90},sbp:{drift:-0.5,floor:60,ceil:130},spo2:{drift:-0.25,floor:82,ceil:99},rr:{drift:0.15,floor:12,ceil:34}},
- tx:{"酸素投与":{spo2:8,note:"SpO₂上昇",key:true},"安楽な体位(半坐位)":{rr:-3,note:"呼吸が少し楽に",key:true},"12誘導心電図":{note:"II・III・aVFでST上昇 → 下壁梗塞を示唆",key:true},"静脈路確保":{note:"左前腕に確保",key:true},"心電図モニター装着":{note:"洞性徐脈、時に心室期外収縮",key:true},"保温":{note:"冷汗・末梢冷感に対し保温"}},
+ tx:{"酸素投与":{spo2:8,note:"SpO₂上昇",key:true},"安楽な体位(半坐位)":{rr:-3,note:"呼吸が少し楽に",key:true},"12誘導心電図":{note:"II・III・aVFでST上昇 → 下壁梗塞を示唆",key:true},"静脈路確保":{note:"左前腕に確保"},"心電図モニター装着":{note:"洞性徐脈、時に心室期外収縮",key:true},"保温":{note:"冷汗・末梢冷感に対し保温"}},
  events:[{at:90,type:"event",msg:"「さっきより楽に…いや、やっぱり苦しい」",cond:s=>true},{at:150,type:"event",msg:"モニターに心室期外収縮(PVC)が散発",cond:s=>!s.tx["酸素投与"]}],
  history:{"S 主訴・症状":"30分前から続く前胸部の締め付けられる痛み。冷汗と吐き気を伴う。","A アレルギー":"特になし。","M 内服薬":"高血圧でアムロジピン。","P 既往歴":"高血圧、脂質異常症。喫煙20本/日。","L 最終経口":"2時間前に昼食。","E 発症状況":"安静時に突然発症。","O 発症様式":"安静時に突然。","P 増悪寛解":"動くと悪化。安静でも続く。","Q 性状":"締め付けられる圧迫感。","R 放散":"左肩から左腕、顎にも広がる。","S 強さ":"10段階で8。","T 時間経過":"30分間持続、軽快しない。"},
  family:{"家族へ：いつから様子がおかしい？":"30分くらい前に急に胸を押さえてしゃがみ込みました。","家族へ：これまで心臓の指摘は？":"健診で心電図に少し異常があると言われたような…。","家族へ：かかりつけは？":"〇〇内科です。お薬手帳あります。"},
  exam:{"頭頸部":"顔面蒼白、冷汗著明。頸静脈怒張なし。","胸部":"呼吸音清。左右差なし。","腹部":"平坦・軟、圧痛なし。","四肢":"末梢冷感あり。橈骨動脈触知やや弱い。","背部":"叩打痛なし。","皮膚":"冷汗・蒼白・湿潤。"},
  dxOptions:["急性心筋梗塞(ACS)","大動脈解離","気胸","逆流性食道炎","肺塞栓"],
- destOptions:["三次(循環器対応・PCI可能)","二次(一般救急)","近隣のかかりつけ内科"]},
+ destOptions:["三次(循環器対応・PCI可能)","二次(一般救急)","近隣のかかりつけ内科"],
+ aiQ:["現着時の第一印象で最も気になった所見は何でしたか？ACSを疑ったきっかけを振り返ってください。","12誘導心電図を装着した判断の根拠と、ST変化の解釈を振り返ってください。","今回の搬送先（PCI可能施設）選定の根拠を一言で説明するとしたら何と言いますか？","次回同じ症例で最初に変えたい処置・判断は何ですか？"]},
 
 {id:"chf",cat:"内因",tier:"上級",diff:"hard",level:"重症・呼吸不全",
  truth:{dx:"急性心不全(肺水腫)",sev:"重症",dest:"三次(循環器対応・PCI可能)"},
@@ -959,13 +1243,14 @@ const TEMPLATES=[
  demo:p=>`${p.age}歳 ${p.sex} / 起座位で肩呼吸、口唇チアノーゼ。`,
  vit0:()=>{const sbp=R(160,200),g=14;return{hr:R(105,130),sbp,dbp:dbpOf(sbp),spo2:R(80,90),rr:R(26,36),bt:R1(36.4,36.8),gcs:g,jcs:jcsOf(g),pupil:"3.0mm 両側 対光反射あり",skin:"冷汗・湿潤"};},
  model:{hr:{drift:0.2,floor:90,ceil:150},sbp:{drift:-0.2,floor:120,ceil:210},spo2:{drift:-0.35,floor:72,ceil:99},rr:{drift:0.3,floor:16,ceil:42}},
- tx:{"高流量酸素投与":{spo2:9,note:"SpO₂上昇",key:true,heal:true},"起座位(上体挙上)":{rr:-3,spo2:2,note:"呼吸仕事量が軽減",key:true},"CPAPの検討・連携":{spo2:6,rr:-4,note:"陽圧で著明改善",key:true},"静脈路確保":{note:"薬剤投与に備え確保",key:true},"心電図モニター装着":{note:"心房細動・頻脈",key:true},"12誘導心電図":{note:"虚血性変化の有無を確認"}},
- events:[{at:80,type:"event",msg:"ピンク色泡沫状の喀痰が増える",cond:s=>!s.tx["高流量酸素投与"]},{at:150,type:"event",msg:"チアノーゼが進行、意識レベルが低下傾向",cond:s=>!s.tx["CPAPの検討・連携"]}],
+ tx:{"高流量酸素投与":{spo2:9,note:"SpO₂上昇",key:true,heal:true},"起座位(上体挙上)":{rr:-3,spo2:2,note:"呼吸仕事量が軽減",key:true},"静脈路確保":{note:"薬剤投与に備え確保（必須ではない）"},"心電図モニター装着":{note:"心房細動・頻脈",key:true},"12誘導心電図":{note:"虚血性変化の有無を確認",key:true}},
+ events:[{at:80,type:"event",msg:"ピンク色泡沫状の喀痰が増える",cond:s=>!s.tx["高流量酸素投与"]},{at:150,type:"event",msg:"チアノーゼが進行、意識レベルが低下傾向",cond:s=>!s.tx["起座位(上体挙上)"]}],
  history:{"S 主訴・症状":"夜間に急に息苦しくなり横になれない。","A アレルギー":"なし。","M 内服薬":"利尿薬、降圧薬(飲み忘れあり)。","P 既往歴":"高血圧、心房細動、陳旧性心筋梗塞。","L 最終経口":"夕食を普通に摂取。","E 発症状況":"就寝後に呼吸困難で覚醒。","O 発症様式":"数日前から労作時息切れ、本日夜に急性増悪。","P 増悪寛解":"臥位で悪化、起座で軽減。","Q 性状":"溺れるような息苦しさ。","R 放散":"—","S 強さ":"会話が途切れるほど。","T 時間経過":"増悪傾向で持続。"},
  family:{"家族へ：足のむくみは？":"数日前から両足がむくんでいました。","家族へ：薬は飲めてる？":"最近飲み忘れが多かったようです。","家族へ：体重の変化は？":"少し増えて息切れも増えていました。"},
  exam:{"頭頸部":"頸静脈怒張あり。口唇チアノーゼ。","胸部":"両下肺にcoarse crackles、呼気延長。","腹部":"軽度膨満。","四肢":"両下腿に圧痕性浮腫、末梢冷感。","背部":"背側にも湿性ラ音。","皮膚":"冷汗・湿潤。"},
  dxOptions:["急性心不全(肺水腫)","気管支喘息発作","肺炎","COPD増悪","過換気症候群"],
- destOptions:["三次(循環器対応・PCI可能)","二次(一般救急)","かかりつけ内科"]},
+ destOptions:["三次(循環器対応・PCI可能)","二次(一般救急)","かかりつけ内科"],
+ aiQ:["起座位・高流量酸素の判断を振り返ってください。なぜその体位と酸素量が有効でしたか？","「心不全」と「喘息」をどう鑑別しようとしましたか？決め手になった所見を教えてください。","心電図モニター・12誘導の確認タイミングと、そこから得た情報をどう活かしましたか？","次回変えること・もっと早くできたことを1つ挙げてください。"]},
 
 {id:"sepsis",cat:"内因",tier:"上級",diff:"hard",level:"重症(敗血症)",
  truth:{dx:"敗血症(敗血症性ショック)",sev:"重症",dest:"三次(救命救急センター)"},
@@ -981,7 +1266,8 @@ const TEMPLATES=[
  family:{"家族へ：いつから熱が？":"3日前から38度台が続いていました。","家族へ：排尿の様子は？":"トイレが近く、痛がっていました。","家族へ：食事や水分は？":"ほとんど摂れていません。"},
  exam:{"頭頸部":"口腔乾燥、ぐったり。","胸部":"呼吸音清だが頻呼吸。","腹部":"季肋部〜腰背部に叩打痛。","四肢":"冷感・CRT延長(3秒超)。","背部":"右CVA叩打痛陽性。","皮膚":"湿潤、まだら模様(網状皮斑)。"},
  dxOptions:["敗血症(敗血症性ショック)","脱水","心原性ショック","低血糖","脳卒中"],
- destOptions:["三次(救命救急センター)","二次(一般救急)","かかりつけ内科"]},
+ destOptions:["三次(救命救急センター)","二次(一般救急)","かかりつけ内科"],
+ aiQ:["「敗血症かもしれない」と考えたきっかけになった所見を振り返ってください（発熱・意識変容・頻脈・血圧）。","qSOFAの3項目（呼吸数・意識・収縮期血圧）を意識して評価できましたか？","感染源の特定（尿路感染など）はどのタイミングで行いましたか？搬送先選定にどう影響しましたか？","次回変えること・もっと早くできたことを1つ挙げてください。"]},
 
 {id:"asthma",cat:"内因",tier:"初級",diff:"mid",level:"中等症〜重症",
  truth:{dx:"気管支喘息発作",sev:"中等症",dest:"二次(一般救急)"},
@@ -997,7 +1283,8 @@ const TEMPLATES=[
  family:{"家族へ：発作の頻度は？":"季節の変わり目によく出ます。","家族へ：今日の吸入は？":"何度か使いましたが効きませんでした。","家族へ：入院歴は？":"以前、発作で入院したことがあります。"},
  exam:{"頭頸部":"会話途切れ、補助呼吸筋使用。","胸部":"両肺にwheeze、呼気延長。","腹部":"異常なし。","四肢":"チアノーゼなし。","背部":"喘鳴聴取。","皮膚":"やや湿潤。"},
  dxOptions:["気管支喘息発作","アナフィラキシー","急性心不全","過換気症候群","肺炎"],
- destOptions:["二次(一般救急)","三次(救命救急センター)","かかりつけ呼吸器内科"]},
+ destOptions:["二次(一般救急)","三次(救命救急センター)","かかりつけ呼吸器内科"],
+ aiQ:["喘息発作の重症度（軽症/中等症/重症/重篤）をどの所見で判断しましたか？","「silent chest」を念頭に置いて呼吸音を聴取しましたか？なぜsilent chestが危険なのか説明できますか？","SpO₂と呼吸数・呼吸補助筋を同時に評価することの重要性を振り返ってください。","次回変えること・もっと早くできたことを1つ挙げてください。"]},
 
 {id:"hypo",cat:"内因",tier:"初級",diff:"mid",level:"中等症(可逆性)",
  truth:{dx:"低血糖",sev:"中等症",dest:"二次(かかりつけ・内科対応)"},
@@ -1013,7 +1300,8 @@ const TEMPLATES=[
  family:{"周囲へ：朝食は食べた？":"食欲がないとほとんど残していました。","周囲へ：インスリンは？":"いつも通り朝に注射しています。","周囲へ：普段の様子は？":"普段はしっかり話す方です。"},
  exam:{"頭頸部":"麻痺所見なし、瞳孔正常。","胸部":"呼吸音清。","腹部":"異常なし。","四肢":"麻痺なし、冷汗・振戦あり。","背部":"異常なし。","皮膚":"冷汗・湿潤。"},
  dxOptions:["低血糖","脳卒中","脱水・熱中症","感染症(敗血症)","薬物中毒"],
- destOptions:["二次(かかりつけ・内科対応)","三次(救命救急センター)","経過観察で帰宅"]},
+ destOptions:["二次(かかりつけ・内科対応)","三次(救命救急センター)","経過観察で帰宅"],
+ aiQ:["「意識障害の原因が低血糖かもしれない」と考えたのはどの情報が引き金でしたか（内服薬・食事状況・皮膚所見）？","血糖測定を初期評価の流れの中でいつ組み込みましたか？タイミングを振り返ってください。","血糖改善後も搬送・経過観察が必要な理由を、インスリン・経口薬の薬理から説明できますか？","次回変えること・もっと早くできたことを1つ挙げてください。"]},
 
 {id:"cva",cat:"内因",tier:"上級",diff:"hard",level:"重症",
  truth:{dx:"脳梗塞(脳卒中)",sev:"重症",dest:"三次(t-PA/血栓回収可能な脳卒中センター)"},
@@ -1029,7 +1317,8 @@ const TEMPLATES=[
  family:{"家族へ：最後に普通だったのは？":"45分前に一緒にお茶を飲んだときは普通でした。","家族へ：抗凝固薬は飲んでる？":"出されてたけど本人が止めていました。","家族へ：頭を打った？":"ぶつけてはいません。"},
  exam:{"頭頸部":"口角下垂、構音障害。瞳孔不同なし。","胸部":"呼吸音清。","腹部":"異常なし。","四肢":"片側上下肢MMT低下、バレー徴候陽性。","背部":"異常なし。","皮膚":"温・乾。"},
  dxOptions:["脳梗塞(脳卒中)","低血糖","てんかん後麻痺","末梢性顔面神経麻痺","片頭痛"],
- destOptions:["三次(t-PA/血栓回収可能な脳卒中センター)","二次(一般救急)","かかりつけ内科"]},
+ destOptions:["三次(t-PA/血栓回収可能な脳卒中センター)","二次(一般救急)","かかりつけ内科"],
+ aiQ:["FASTのどの項目が最初に引っかかりましたか？「脳卒中かもしれない」と感じた所見を振り返ってください。","発症時刻（最終健常確認）の確認はどのタイミングで行いましたか？t-PA適応への影響を説明できますか？","血糖測定を行いましたか？脳卒中と低血糖の鑑別で血糖測定が重要な理由を振り返ってください。","次回変えること・もっと早くできたことを1つ挙げてください。"]},
 
 {id:"ana",cat:"内因",tier:"上級",diff:"hard",level:"重症・分単位で悪化",
  truth:{dx:"アナフィラキシーショック",sev:"重症(緊急)",dest:"三次(救命救急センター)"},
@@ -1040,13 +1329,32 @@ const TEMPLATES=[
  demo:p=>`${p.age}歳 ${p.sex} / 立位保持困難、顔面紅潮と膨疹、喘鳴。`,
  vit0:()=>{const sbp=R(78,94),g=14;return{hr:R(115,140),sbp,dbp:dbpOf(sbp),spo2:R(88,93),rr:R(24,32),bt:R1(36.4,36.8),gcs:g,jcs:jcsOf(g),pupil:"4.0mm 両側 対光反射あり",skin:"全身紅潮・膨疹・口唇腫脹"};},
  model:{hr:{drift:0.8,floor:90,ceil:160},sbp:{drift:-0.9,floor:50,ceil:120},spo2:{drift:-0.4,floor:70,ceil:99},rr:{drift:0.3,floor:14,ceil:40}},
- tx:{"アドレナリン筋注の要請/連携":{hr:-15,sbp:25,spo2:5,rr:-6,note:"症状著明改善",key:true,heal:true},"高濃度酸素投与":{spo2:10,note:"SpO₂上昇",key:true},"仰臥位+下肢挙上(ショック体位)":{sbp:8,note:"血圧やや改善",key:true},"静脈路確保・輸液":{sbp:10,note:"細胞外液急速投与",key:true},"気道の観察(喉頭浮腫)":{note:"嗄声・吸気性喘鳴あり、狭窄進行に注意",key:true}},
- events:[{at:60,type:"event",msg:"喘鳴が増強、「喉が…閉まる感じ」",cond:s=>!s.tx["アドレナリン筋注の要請/連携"]},{at:130,type:"event",msg:"嗄声が強くなりSpO₂低下が加速",cond:s=>!s.tx["高濃度酸素投与"]}],
+ tx:{"アドレナリン筋注の要請/連携（医師指示・本人処方品）":{hr:-15,sbp:25,spo2:5,rr:-6,note:"医師指示下で実施。症状著明改善",key:true,heal:true},"同僚のエピペンを使用（他者処方）":{note:"救急救命士が使用できるエピペンは本人処方品のみ。他者処方品の使用は法令上・倫理上不適切",wrong:true},"高濃度酸素投与":{spo2:10,note:"SpO₂上昇",key:true},"仰臥位+下肢挙上(ショック体位)":{sbp:8,note:"血圧やや改善",key:true},"静脈路確保・輸液":{sbp:10,note:"細胞外液急速投与",key:true},"気道の観察(喉頭浮腫)":{note:"嗄声・吸気性喘鳴あり、狭窄進行に注意",key:true}},
+ events:[{at:60,type:"event",msg:"喘鳴が増強、「喉が…閉まる感じ」",cond:s=>!s.tx["アドレナリン筋注の要請/連携（医師指示・本人処方品）"]},{at:130,type:"event",msg:"嗄声が強くなりSpO₂低下が加速",cond:s=>!s.tx["高濃度酸素投与"]}],
  history:{"S 主訴・症状":"刺された直後から全身のかゆみ、膨疹、息苦しさ、めまい。","A アレルギー":"以前にも蜂で腫れたことがある。","M 内服薬":"なし。","P 既往歴":"アレルギー性鼻炎。","L 最終経口":"1時間前。","E 発症状況":"屋外作業中に前腕を蜂に刺された。","O 発症様式":"刺傷後5分以内に急速発症。","P 増悪寛解":"時間とともに悪化。","Q 性状":"全身のかゆみ、喉のつまる感じ。","R 放散":"—","S 強さ":"立っていられない。","T 時間経過":"発症から約10分、進行中。"},
- family:{"同僚へ：何の蜂？":"スズメバチだと思います。","同僚へ：エピペンは？":"本人は持っていないと思います。","同僚へ：刺されたのは何回目？":"前にも刺されて腫れたそうです。"},
+ family:{"同僚へ：何の蜂？":"スズメバチだと思います。","同僚へ：エピペンは？":"私（同僚）のエピペンがあります！使えますか？（同僚本人の処方品）","同僚へ：刺されたのは何回目？":"前にも刺されて腫れたそうです。"},
  exam:{"頭頸部":"口唇・舌の腫脹、嗄声、吸気性喘鳴。","胸部":"両肺にwheeze、呼気延長。","腹部":"軽度腹痛、嘔気。","四肢":"刺し口と発赤、全身に膨疹。","背部":"膨疹散在。","皮膚":"全身紅潮・蕁麻疹・湿潤。"},
  dxOptions:["アナフィラキシーショック","気管支喘息発作","過換気症候群","心原性ショック","熱中症"],
- destOptions:["三次(救命救急センター)","二次(一般救急)","皮膚科クリニック"]},
+ destOptions:["三次(救命救急センター)","二次(一般救急)","皮膚科クリニック"],
+ aiQ:["「アナフィラキシー」を疑ったきっかけを振り返ってください。皮膚症状・気道・循環のうち最初に引っかかった所見は何でしたか？","同僚のエピペンを使用しなかった（または使用した）理由を振り返ってください。他者処方品を使用できない根拠を説明できますか？","気道狭窄の進行（嗄声・吸気性喘鳴）を経時的に観察できましたか？","次回変えること・もっと早くできたことを1つ挙げてください。"]},
+
+{id:"ana_own",cat:"内因",tier:"上級",diff:"hard",level:"重症・分単位で悪化",
+ truth:{dx:"アナフィラキシーショック",sev:"重症(緊急)",dest:"三次(救命救急センター)"},
+ person:()=>PERS(18,60),
+ airwayNote:"嗄声・吸気性喘鳴あり、喉頭浮腫による気道閉塞の進行に注意。",
+ title:p=>`刺された後に呼吸困難の${p.age}歳${p.sex}（エピペン所持）`,
+ brief:p=>`指令：${p.age}歳${p.sex}、屋外で蜂に刺され全身のかゆみと息苦しさ。本人処方のエピペン所持あり。`,
+ demo:p=>`${p.age}歳 ${p.sex} / 立位保持困難、顔面紅潮と膨疹、喘鳴。バッグにエピペンを携帯。`,
+ vit0:()=>{const sbp=R(78,94),g=14;return{hr:R(115,140),sbp,dbp:dbpOf(sbp),spo2:R(88,93),rr:R(24,32),bt:R1(36.4,36.8),gcs:g,jcs:jcsOf(g),pupil:"4.0mm 両側 対光反射あり",skin:"全身紅潮・膨疹・口唇腫脹"};},
+ model:{hr:{drift:0.8,floor:90,ceil:160},sbp:{drift:-0.9,floor:50,ceil:120},spo2:{drift:-0.4,floor:70,ceil:99},rr:{drift:0.3,floor:14,ceil:40}},
+ tx:{"患者本人のエピペンを使用（医師指示下）":{hr:-15,sbp:25,spo2:5,rr:-6,note:"本人処方品を医師指示下で使用。症状著明改善",key:true,heal:true},"医師指示なしでエピペンを使用（無指示・不適切）":{note:"エピペン使用には医師指示が必要。本人処方品であっても無指示での使用は不適切",wrong:true},"高濃度酸素投与":{spo2:10,note:"SpO₂上昇",key:true},"仰臥位+下肢挙上(ショック体位)":{sbp:8,note:"血圧やや改善",key:true},"静脈路確保・輸液":{sbp:10,note:"細胞外液急速投与",key:true},"気道の観察(喉頭浮腫)":{note:"嗄声・吸気性喘鳴あり、狭窄進行に注意",key:true}},
+ events:[{at:60,type:"event",msg:"喘鳴が増強、「喉が…閉まる感じ」",cond:s=>!s.tx["患者本人のエピペンを使用（医師指示下）"]},{at:130,type:"event",msg:"嗄声が強くなりSpO₂低下が加速",cond:s=>!s.tx["高濃度酸素投与"]}],
+ history:{"S 主訴・症状":"刺された直後から全身のかゆみ、膨疹、息苦しさ、めまい。","A アレルギー":"以前にも蜂で強いアレルギー症状が出たためエピペンを処方されている。","M 内服薬":"なし。","P 既往歴":"アレルギー性鼻炎、蜂アレルギー（エピペン処方済）。","L 最終経口":"1時間前。","E 発症状況":"屋外作業中に前腕を蜂に刺された。","O 発症様式":"刺傷後5分以内に急速発症。","P 増悪寛解":"時間とともに悪化。","Q 性状":"全身のかゆみ、喉のつまる感じ。","R 放散":"—","S 強さ":"立っていられない。","T 時間経過":"発症から約10分、進行中。"},
+ family:{"同僚へ：何の蜂？":"スズメバチだと思います。","同僚へ：エピペンは？":"本人のバッグにエピペンが入っています！本人処方のものです。","同僚へ：刺されたのは何回目？":"前回も強い反応が出てエピペンを処方されたと聞いています。"},
+ exam:{"頭頸部":"口唇・舌の腫脹、嗄声、吸気性喘鳴。","胸部":"両肺にwheeze、呼気延長。","腹部":"軽度腹痛、嘔気。","四肢":"刺し口と発赤、全身に膨疹。","背部":"膨疹散在。","皮膚":"全身紅潮・蕁麻疹・湿潤。"},
+ dxOptions:["アナフィラキシーショック","気管支喘息発作","過換気症候群","心原性ショック","熱中症"],
+ destOptions:["三次(救命救急センター)","二次(一般救急)","皮膚科クリニック"],
+ aiQ:["「アナフィラキシー」を疑ったきっかけを振り返ってください。皮膚症状・気道・循環のうち最初に引っかかった所見は何でしたか？","患者本人のエピペンを使用する前に医師指示を取得しましたか？本人処方品であっても指示が必要な理由を説明できますか？","気道狭窄の進行（嗄声・吸気性喘鳴）を経時的に観察できましたか？","次回変えること・もっと早くできたことを1つ挙げてください。"]},
 
 {id:"dissection",cat:"内因",tier:"上級",diff:"hard",level:"重症・致死的",
  truth:{dx:"急性大動脈解離",sev:"重症",dest:"三次(心臓血管外科対応)"},
@@ -1062,7 +1370,8 @@ const TEMPLATES=[
  family:{"家族へ：いつから？":"急に胸と背中が痛いと言って倒れ込みました。","家族へ：血圧の薬は？":"高血圧の薬を飲んでいますが最近忘れがちでした。","家族へ：痛みの場所は変わった？":"最初は胸で、今は背中から腰が痛いと言っています。"},
  exam:{"頭頸部":"顔面蒼白、冷汗。","胸部":"呼吸音清。心雑音聴取することあり。","腹部":"平坦、拍動性腫瘤は触れにくい。","四肢":"左右の橈骨動脈・血圧に左右差。末梢冷感。","背部":"移動する激痛、叩打痛なし。","皮膚":"冷汗・蒼白・湿潤。"},
  dxOptions:["急性大動脈解離","急性心筋梗塞(ACS)","肺塞栓","緊張性気胸","急性膵炎"],
- destOptions:["三次(心臓血管外科対応)","二次(一般救急)","かかりつけ内科"]},
+ destOptions:["三次(心臓血管外科対応)","二次(一般救急)","かかりつけ内科"],
+ aiQ:["「引き裂かれる・移動する痛み」という性状から大動脈解離を疑ったのはいつでしたか？ACSとの鑑別をどう考えましたか？","上肢の左右差血圧を測定しましたか？なぜこの確認が解離の診断に重要なのか説明できますか？","解離ではACSと異なり「過剰な降圧・鎮痛を避けない・安静が最優先」となる理由を振り返ってください。","次回変えること・もっと早くできたことを1つ挙げてください。"]},
 
 {id:"sah",cat:"内因",tier:"上級",diff:"hard",level:"重症(頭蓋内出血)",
  truth:{dx:"くも膜下出血",sev:"重症",dest:"三次(脳神経外科対応)"},
@@ -1078,7 +1387,8 @@ const TEMPLATES=[
  family:{"家族へ：どんな風に始まった？":"急に頭を抱えて『今までで一番痛い』と。","家族へ：頭を打った？":"ぶつけてはいません、突然です。","家族へ：吐いた？":"何度か嘔吐しました。"},
  exam:{"頭頸部":"項部硬直あり、羞明。瞳孔正常。","胸部":"呼吸音清。","腹部":"異常なし。","四肢":"明らかな麻痺は乏しい。","背部":"異常なし。","皮膚":"温・乾。"},
  dxOptions:["くも膜下出血","脳梗塞","髄膜炎","片頭痛","高血圧性脳症"],
- destOptions:["三次(脳神経外科対応)","二次(一般救急)","かかりつけ内科"]},
+ destOptions:["三次(脳神経外科対応)","二次(一般救急)","かかりつけ内科"],
+ aiQ:["「人生最悪の頭痛」「突然発症(雷鳴頭痛)」という情報をどのタイミングで取得し、どう解釈しましたか？","項部硬直の確認はしましたか？SAHで陽性となる理由を説明できますか？","SAHでの血圧管理において「過剰な降圧を避ける」理由と、再出血予防のための安静の重要性を振り返ってください。","次回変えること・もっと早くできたことを1つ挙げてください。"]},
 
 /* ---------- 外傷 ---------- */
 {id:"head",cat:"外傷",tier:"上級",diff:"hard",level:"重症(頭部外傷)",
@@ -1096,7 +1406,8 @@ const TEMPLATES=[
  family:{"目撃者へ：どのくらいの高さ？":"脚立の上の方、1.5mくらいです。","目撃者へ：直後の様子は？":"最初は普通に話していました。","目撃者へ：吐いた？":"2回ほど嘔吐しました。"},
  exam:{"頭頸部":"後頭部に挫創・血腫。瞳孔不同。","胸部":"呼吸音清、左右差なし。","腹部":"異常なし。","四肢":"片側不全麻痺の疑い。","背部":"脊椎叩打痛なし(ログロール)。","皮膚":"温・乾。"},
  dxOptions:["急性硬膜外血腫","脳震盪","急性アルコール中毒","てんかん","くも膜下出血"],
- destOptions:["三次(脳神経外科対応)","二次(一般救急)","整形外科クリニック"]},
+ destOptions:["三次(脳神経外科対応)","二次(一般救急)","整形外科クリニック"],
+ aiQ:["「lucid interval（一時清明期）後の意識低下」から何を疑いましたか？この経過の典型的な疾患を説明できますか？","GCSと瞳孔不同を経時評価しましたか？Cushing現象（徐脈・高血圧・不規則呼吸）を意識して観察できましたか？","頸椎保護と気道確保の優先順位をどうつけましたか？","次回変えること・もっと早くできたことを1つ挙げてください。"]},
 
 {id:"hemo",cat:"外傷",tier:"上級",diff:"hard",level:"重症(出血性ショック)",
  truth:{dx:"腹腔内出血による出血性ショック",sev:"重症",dest:"三次(外傷センター)"},
@@ -1112,7 +1423,8 @@ const TEMPLATES=[
  family:{"目撃者へ：どんな事故？":"出会い頭にぶつかって数m飛ばされました。","目撃者へ：ヘルメットは？":"かぶっていました。","本人へ：頭は打った？":"たぶん打ってない、お腹が痛い。"},
  exam:{"頭頸部":"頭部外傷なし、頸部圧痛なし。","胸部":"呼吸音左右差なし、胸郭動揺なし。","腹部":"上腹部に圧痛・筋性防御、徐々に膨隆。","四肢":"擦過傷、明らかな変形なし。末梢冷感。","背部":"脊椎叩打痛なし。","皮膚":"蒼白・冷汗・CRT延長。"},
  dxOptions:["腹腔内出血による出血性ショック","単純腹部打撲","緊張性気胸","骨盤骨折","脊髄損傷"],
- destOptions:["三次(外傷センター)","二次(一般救急)","整形外科クリニック"]},
+ destOptions:["三次(外傷センター)","二次(一般救急)","整形外科クリニック"],
+ aiQ:["ショック指数（HR÷SBP）を意識して計算しましたか？今回の数値から出血性ショックの重症度をどう判断しましたか？","「ロード＆ゴー」の判断をしたタイミングと根拠を振り返ってください。現場滞在時間の短縮を意識できましたか？","外表に大量出血がない場合に腹腔内出血を疑う根拠（受傷機転・腹部所見）を説明できますか？","次回変えること・もっと早くできたことを1つ挙げてください。"]},
 
 {id:"heat",cat:"外傷",tier:"上級",diff:"hard",level:"重症(熱射病)",
  truth:{dx:"熱射病(重症熱中症)",sev:"重症",dest:"三次(救命救急センター)"},
@@ -1128,7 +1440,8 @@ const TEMPLATES=[
  family:{"周囲へ：どのくらい作業を？":"数時間、休憩なしでした。","周囲へ：水分は？":"あまり摂っていませんでした。","周囲へ：汗は？":"途中から汗をかかなくなっていました。"},
  exam:{"頭頸部":"高体温、意識障害。","胸部":"呼吸音清、頻呼吸。","腹部":"異常なし。","四肢":"皮膚熱感・乾燥。","背部":"異常なし。","皮膚":"高温・乾燥・発汗停止。"},
  dxOptions:["熱射病(重症熱中症)","脱水","脳卒中","感染症(敗血症)","低血糖"],
- destOptions:["三次(救命救急センター)","二次(一般救急)","経過観察で帰宅"]},
+ destOptions:["三次(救命救急センター)","二次(一般救急)","経過観察で帰宅"],
+ aiQ:["「熱中症」と「熱射病」の違いをどこで判断しましたか？意識障害と発汗停止がなぜ重症のサインなのか説明できますか？","体温測定と積極的冷却の優先順位・タイミングを振り返ってください。どの冷却方法を選択しましたか？","意識障害のある高体温患者で低血糖・脳卒中との鑑別をどう行いましたか？","次回変えること・もっと早くできたことを1つ挙げてください。"]},
 
 /* ---------- 小児・産科 ---------- */
 {id:"febsz",cat:"小児・産科",tier:"初級",diff:"mid",level:"中等症(小児)",
@@ -1145,7 +1458,8 @@ const TEMPLATES=[
  family:{"家族へ：けいれんは何分？":"2〜3分くらいでした。","家族へ：熱はいつから？":"今朝から38度台でした。","家族へ：前にもあった？":"以前にも熱で同じことがありました。"},
  exam:{"頭頸部":"もうろう状態(postictal)、項部硬直なし。","胸部":"呼吸音清。","腹部":"異常なし。","四肢":"明らかな麻痺なし。","背部":"異常なし。","皮膚":"温・紅潮。"},
  dxOptions:["熱性痙攣","胃腸炎関連けいれん","髄膜炎・脳炎","低血糖","てんかん"],
- destOptions:["二次(小児科対応)","三次(救命救急センター)","経過観察で帰宅"]},
+ destOptions:["二次(小児科対応)","三次(救命救急センター)","経過観察で帰宅"],
+ aiQ:["けいれんの持続時間を計測しましたか？5分以上の遷延（重積）は何が危険なのか説明できますか？","血糖測定を行いましたか？熱性痙攣と低血糖けいれんの鑑別における重要性を振り返ってください。","項部硬直・羞明の確認はしましたか？髄膜炎・脳炎との鑑別で重要な理由を説明してください。","次回変えること・もっと早くできたことを1つ挙げてください。"]},
 
 {id:"croup",cat:"小児・産科",tier:"上級",diff:"hard",level:"重症(小児・気道)",
  truth:{dx:"クループ症候群",sev:"中等症",dest:"二次(小児科対応)"},
@@ -1162,7 +1476,8 @@ const TEMPLATES=[
  family:{"家族へ：いつから？":"夜中に急に咳と変な呼吸音が。","家族へ：水分は摂れる？":"少しは飲めています。","家族へ：よだれは？":"今のところ普通です。"},
  exam:{"頭頸部":"吸気性喘鳴、嗄声。","胸部":"陥没呼吸、呼吸音は左右差なし。","腹部":"異常なし。","四肢":"チアノーゼなし。","背部":"異常なし。","皮膚":"やや湿潤。"},
  dxOptions:["クループ症候群","急性喉頭蓋炎","気管支喘息発作","異物誤嚥","細気管支炎"],
- destOptions:["二次(小児科対応)","三次(救命救急センター)","経過観察で帰宅"]},
+ destOptions:["二次(小児科対応)","三次(救命救急センター)","経過観察で帰宅"],
+ aiQ:["吸気性喘鳴（stridor）を最初に確認したとき、クループと喉頭蓋炎の鑑別をどう考えましたか？「流涎・起座呼吸」がなぜ危険なサインなのか説明できますか？","「児を刺激しない」という対応の根拠を振り返ってください。啼泣が気道狭窄に与える影響を説明できますか？","酸素投与時に子どもへどうアプローチしましたか？マスクを嫌がる場合の対処を振り返ってください。","次回変えること・もっと早くできたことを1つ挙げてください。"]},
 
 {id:"delivery",cat:"小児・産科",tier:"上級",diff:"hard",level:"切迫した現場分娩",
  truth:{dx:"分娩第2期(切迫分娩)",sev:"中等症",dest:"二次(産科対応)"},
@@ -1178,7 +1493,8 @@ const TEMPLATES=[
  family:{"夫へ：予定日は？":"もうすぐ予定日です。","夫へ：何人目？":"2人目です。","夫へ：破水は？":"さっき破水しました。"},
  exam:{"頭頸部":"発汗、苦痛様。","胸部":"呼吸音清。","腹部":"規則的な子宮収縮、児頭下降。","四肢":"異常なし。","背部":"腰部痛。","皮膚":"温・湿潤。"},
  dxOptions:["分娩第2期(切迫分娩)","切迫早産","常位胎盤早期剥離","尿路結石","偽陣痛"],
- destOptions:["二次(産科対応)","三次(母体救命センター)","かかりつけ産院"]},
+ destOptions:["二次(産科対応)","三次(母体救命センター)","かかりつけ産院"],
+ aiQ:["陣痛間隔・努責感・破水の状況から「現場分娩になる可能性が高い」と判断したのはどのタイミングでしたか？","現場分娩となった場合、娩出後に最初に確認すべき事項（児の呼吸・啼泣・保温）を時系列で説明できますか？","母体と新生児のどちらを優先的にモニタリングしましたか？それぞれへの対応を振り返ってください。","次回変えること・もっと早くできたことを1つ挙げてください。"]},
 ];
 
 /* ---- ガチャ状態と操作 ---- */
@@ -1197,7 +1513,7 @@ function buildRandom(){
     vit0:v0, model, tx:t.tx, events:det?(t.events||[]):[],
     history:t.history, family:t.family, exam:t.exam,
     dxOptions:gshuffle(t.dxOptions.slice()), destOptions:t.destOptions,
-    airwayNote:t.airwayNote||null,
+    airwayNote:t.airwayNote||null, aiQ:t.aiQ||null,
   };
 }
 document.querySelectorAll('.gchip[data-gcat]').forEach(c=>{c.onclick=()=>{const k=c.dataset.gcat;if(gCats.has(k)){if(gCats.size>1){gCats.delete(k);c.classList.remove('on');}}else{gCats.add(k);c.classList.add('on');}};});
